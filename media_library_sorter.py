@@ -6,10 +6,24 @@ from abc import ABC, abstractmethod
 
 def label_updater(label, new_text, append=False):
 
-    # if a list separate before printing in label
-    if(type(new_text) == list):
-        new_text = "\n".join(new_text)
+    print("label updater")
+    # print(len(new_text))
+    # print(new_text)
 
+    print(type(new_text))
+    # if list is supplied print each element separately
+    if(type(new_text) == list):
+        # print(new_text[0])
+        # print(new_text[1])
+        if(append is False):
+            label["text"] = ""
+        for element in new_text:
+            new_text = "\n".join(element)
+            new_text = label["text"] + "\n" + new_text
+            label["text"] = new_text 
+        return
+
+    # if a string add to label, append if specified
     if(append is True):
         new_text = label["text"] + "\n" + new_text
         label["text"] = new_text
@@ -61,7 +75,7 @@ class CreateLib(TkElements):
 
         # Label to show files selected
         self.selected_items_label = tk.Label(
-            addlib_frame, text="None selected yet", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
+            addlib_frame, text="Select items to add", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
         self.selected_items_label.grid(row=1, column=1)
 
         # Entry to get library name
@@ -88,17 +102,21 @@ class CreateLib(TkElements):
 
         # clear labels
         label_updater(self.info_label, "")
-        # label_updater(self.selected_items_label, "")
-
-        # folder = filedialog.askdirectory(initialdir="lib/", title="select your folder")
-        # file = filedialog.askopenfile(mode='r', filetypes=[('Text files', '*.txt')])
         print("Browse button clicked")
 
-        # dialog asks user for items to add
-        lib_items = filedialog.askopenfilenames(title='Multiselect Items to Add', filetypes=[('Text files', '*.txt')])
+        # dialog asks user for items to add, append each to a list
+        selected_items = filedialog.askopenfilenames(title='Select one or multiple items', filetypes=[('Any', '*')])
+        print(selected_items)
+        print(type(selected_items))
+        print(f"len:{len(selected_items)}")
+        # handle when user multi selects items from dialog
+        if (len(selected_items) > 1):
+            for each_item in list(selected_items):
+                self.lib_items_all.append(each_item)
+        else:
+            self.lib_items_all.append(list(selected_items))
         
         # update label with selected items
-        self.lib_items_all = list(lib_items)
         print(f"Selected items: {self.lib_items_all}")
         label_updater(self.selected_items_label, self.lib_items_all)
 
@@ -126,17 +144,24 @@ class CreateLib(TkElements):
                 lib_name = "libraries/"+lib_name
                 lib_folder = pathlib.Path(lib_name)
                 lib_folder.mkdir(parents=True, exist_ok=False)
+                label_updater(self.selected_items_label, "Select items to add")
+
+                #  get file path and copy items to lib folder
+                print("Copying items to lib:")
+                for each_item in self.lib_items_all:
+                    print(each_item)
+                    shutil.copy("".join(each_item), lib_folder)
+
                 label_updater(self.info_label, f"Library '{lib_name}' created!")
+                self.lib_items_all = []
+
             except(FileExistsError):
                 label_updater(self.info_label, "ERROR: Library already exists, enter a different name")
             except Exception as except_message:
-                label_updater(self.info_label, f"ERROR: {except_message}")
+                label_updater(self.info_label, "ERROR: exception")
+                print(except_message)
+                self.lib_items_all = []
 
-            # copy items to lib folder
-            print("Copying items to lib:")
-            for each_item in self.lib_items_all:
-                print(each_item)
-                shutil.copy(each_item, lib_folder)
 
 
 
