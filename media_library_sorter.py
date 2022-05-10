@@ -11,7 +11,7 @@ def label_updater(label, new_text, append=False):
         new_text = "\n".join(new_text)
 
     if(append is True):
-        new_text = label["text"] + "\n" + new_text 
+        new_text = label["text"] + "\n" + new_text
         label["text"] = new_text
     else:
         label["text"] = new_text
@@ -30,7 +30,7 @@ class TkElements():
     colour_txt = "white"
     window = tk.Tk()
 
-    # construct the GUI window 
+    # construct the GUI window
     def __init__(self):
        self.window.geometry("700x700")
        self.window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
@@ -44,7 +44,7 @@ class CreateLib(TkElements):
         
         self.lib_items_all = []
 
-        # construct gui for creating libraries    
+        # construct frame for adding items to a library    
         addlib_frame = tk.Frame(TkElements.window, bg="#abcdef")
 
         add_label = tk.Label(addlib_frame, text="Add New Library", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
@@ -54,7 +54,7 @@ class CreateLib(TkElements):
         add_button = tk.Button(addlib_frame, text="Browse Files To Add", command=self.add_to_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
         add_button.grid(row=1, column=0)
 
-        # Libs selected
+        # Label to show files selected
         self.selected_items_label = tk.Label(
             addlib_frame, text="None selected yet", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
         self.selected_items_label.grid(row=1, column=1)
@@ -66,10 +66,11 @@ class CreateLib(TkElements):
         self.lib_name_entry = tk.Entry(addlib_frame, bg=TkElements.colour_txt, width=25)
         self.lib_name_entry.grid(row=2, column=1)
 
+        # Button to save library
         save_button = tk.Button(addlib_frame, text="Save Library", command=self.save_to_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
         save_button.grid(row=3, column=0, pady=10)
 
-        # Info label
+        # Info label will provide feedback to user
         self.info_label = tk.Label(
             addlib_frame, text="", fg="red", bg=TkElements.colour_bg)
         self.info_label.grid(row=4, column=0)
@@ -84,14 +85,14 @@ class CreateLib(TkElements):
         label_updater(self.info_label, "")
         # label_updater(self.selected_items_label, "")
 
-
         # folder = filedialog.askdirectory(initialdir="lib/", title="select your folder")
         # file = filedialog.askopenfile(mode='r', filetypes=[('Text files', '*.txt')])
-        print("Getting user items")
+        print("Browse button clicked")
 
-        # user selects items to add
+        # dialog asks user for items to add
         lib_items = filedialog.askopenfilenames(title='Multiselect Items to Add', filetypes=[('Text files', '*.txt')])
         
+        # update label with selected items
         self.lib_items_all = list(lib_items)
         print(f"Selected items: {self.lib_items_all}")
         label_updater(self.selected_items_label, self.lib_items_all)
@@ -100,10 +101,10 @@ class CreateLib(TkElements):
         
         # get name entered by user
         lib_name = entry_reader(self.lib_name_entry)
-        # remove spaces from lib name
+        # remove spaces from lib name if any
         lib_name = lib_name.replace(" ", "")
 
-        # create lib with files if name is not blank or valid and user has selected at least one item
+        # create lib with files if name is not blank or invalid and if user has selected at least one item
         if (self.lib_items_all == []):
             label_updater(self.info_label, "ERROR: Select at least one file first")
         elif (lib_name == ""):
@@ -114,7 +115,7 @@ class CreateLib(TkElements):
             label_updater(self.info_label, "")
             print(f"Creating lib: {lib_name}")
 
-            # create folder for lib
+            # create folder representing lib
             try:
                 # lib_name = "lib-"+lib_name
                 lib_name = "libraries/"+lib_name
@@ -126,7 +127,7 @@ class CreateLib(TkElements):
             except Exception as except_message:
                 label_updater(self.info_label, f"ERROR: {except_message}")
 
-            # copy media items to folder
+            # copy items to lib folder
             print("Copying items to lib:")
             for each_item in self.lib_items_all:
                 print(each_item)
@@ -140,10 +141,11 @@ class ViewLib(TkElements):
     lib_config_file = "libraries.config"
     all_libs_list = []
 
-    libbuttons_frame = tk.Frame(TkElements.window)  # frame to hold button for each lib item 
+    # frame to hold dynamic buttons for each  existing lib 
+    libbuttons_frame = tk.Frame(TkElements.window)  
 
+    # construct frame for viewing current library    
     def __init__(self):
-
         viewlib_frame = tk.Frame(TkElements.window) 
 
         yourlib_label = tk.Label(viewlib_frame, text="Your Libraries", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
@@ -155,6 +157,7 @@ class ViewLib(TkElements):
         self.viewlib_label = tk.Label(viewlib_frame, text=".", font=('Aeriel 10 bold'))
         self.viewlib_label.grid(row=2, column=0)
 
+        # display frame in window
         viewlib_frame.pack()
         self.libbuttons_frame.pack()
 
@@ -164,10 +167,14 @@ class ViewLib(TkElements):
             print("Lib folder doesn't exist, creating")
             lib_path.mkdir()
 
+    def get_and_list_libs(self):
+
+        print("view lib button clicked") 
+
         # iterate through all items in library folders. get name of lib and items in each lib
         # generate list of lists representing all library items - format: [[lib1-name, lib1-item1, lib1-item2], [lib2-name, lib2-item1], [...]]
         index = 0
-        for folder_path in lib_path.iterdir():
+        for folder_path in pathlib.Path(self.lib_folder).iterdir():
             if(folder_path.is_dir()):
                 self.all_libs_list.append([])
                 # print(index)
@@ -191,11 +198,7 @@ class ViewLib(TkElements):
                 f_config.write(element+"\n")
                 
 
-        print(*self.all_libs_list, sep="\n")
-
-    def get_and_list_libs(self):
-
-        print("view lib button clicked")        
+        print(*self.all_libs_list, sep="\n")     
 
         if(len(self.all_libs_list) == 0):
             print("No library items")
