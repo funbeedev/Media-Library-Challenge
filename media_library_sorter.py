@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import pathlib
 import shutil
-
+from abc import ABC, abstractmethod
 
 def label_updater(label, new_text, append=False):
 
@@ -22,7 +22,7 @@ def entry_reader(entry):
     return entry_text
 
 
-class TkElements():
+class TkElements(ABC):
 
     colour_bg_title = "white"
     colour_bg = "#abcdef"
@@ -37,10 +37,15 @@ class TkElements():
        self.window.columnconfigure([0, 1, 2], minsize=100, weight=1)
        self.window.title("Media Library Sorter")
 
+    # ensure method is used in inherited classes
+    @abstractmethod
+    def draw_frame(self):
+        pass
 
 class CreateLib(TkElements):
 
-    def __init__(self):
+    # draw widgets for creating libraries  
+    def draw_frame(self):
         
         self.lib_items_all = []
 
@@ -144,8 +149,15 @@ class ViewLib(TkElements):
     # frame to hold dynamic buttons for each  existing lib 
     libbuttons_frame = tk.Frame(TkElements.window)  
 
-    # construct frame for viewing current library    
     def __init__(self):
+        # ensure lib folder exists, if not create
+        lib_path = pathlib.Path(self.lib_folder)
+        if(lib_path.is_dir() is False):
+            print("libraries folder doesn't exist, creating")
+            lib_path.mkdir()
+
+    # draw widgets for viewing libraries  
+    def draw_frame(self):
         viewlib_frame = tk.Frame(TkElements.window) 
 
         yourlib_label = tk.Label(viewlib_frame, text="Your Libraries", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
@@ -161,11 +173,6 @@ class ViewLib(TkElements):
         viewlib_frame.pack()
         self.libbuttons_frame.pack()
 
-        # ensure lib folder exists, if not create
-        lib_path = pathlib.Path(self.lib_folder)
-        if(lib_path.is_dir() is False):
-            print("Lib folder doesn't exist, creating")
-            lib_path.mkdir()
 
     def get_and_list_libs(self):
 
@@ -226,13 +233,15 @@ class ViewLib(TkElements):
 
 def setup_window():
     # handle common tk elements
-    tk_elements = TkElements()
+    # tk_elements = TkElements()
     
     # handle creating new libs
     new_lib = CreateLib()
+    new_lib.draw_frame()
     
     # handle viewing libs
     view_lib = ViewLib()
+    view_lib.draw_frame()
 
     # start Tkinter event loop
     TkElements.window.mainloop()
