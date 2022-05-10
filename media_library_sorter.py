@@ -22,10 +22,63 @@ def entry_reader(entry):
     return entry_text
 
 
-class CreateLib:
+class TkElements():
+
+    colour_bg_title = "white"
+    colour_bg = "#abcdef"
+    colour_btn = "green"
+    colour_txt = "white"
+    window = tk.Tk()
+
+    # construct the GUI window 
+    def __init__(self):
+       self.window.geometry("700x700")
+       self.window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
+       self.window.columnconfigure([0, 1, 2], minsize=100, weight=1)
+       self.window.title("Media Library Sorter")
+
+    
+
+
+class CreateLib(TkElements):
 
     def __init__(self):
+        
         self.lib_items_all = []
+
+        # construct gui for creating libraries    
+        addlib_frame = tk.Frame(TkElements.window, bg="#abcdef")
+
+        add_label = tk.Label(addlib_frame, text="Add New Library", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
+        add_label.grid(row=0, column=0, columnspan=2, sticky="we")
+
+        # Button to select files
+        add_button = tk.Button(addlib_frame, text="Browse Files To Add", command=self.add_to_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
+        add_button.grid(row=1, column=0)
+
+        # Libs selected
+        self.selected_items_label = tk.Label(
+            addlib_frame, text="None selected yet", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
+        self.selected_items_label.grid(row=1, column=1)
+
+        # Entry to get library name
+        enter_name_label = tk.Label(addlib_frame, text="Enter Name of Library:", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
+        enter_name_label.grid(row=2, column=0, pady=10)
+
+        self.lib_name_entry = tk.Entry(addlib_frame, bg=TkElements.colour_txt, width=25)
+        self.lib_name_entry.grid(row=2, column=1)
+
+        save_button = tk.Button(addlib_frame, text="Save Library", command=self.save_to_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
+        save_button.grid(row=3, column=0, pady=10)
+
+        # Info label
+        self.info_label = tk.Label(
+            addlib_frame, text="", fg="red", bg=TkElements.colour_bg)
+        self.info_label.grid(row=4, column=0)
+
+        # display frame on window
+        addlib_frame.pack()
+
 
     def add_to_lib(self):
 
@@ -82,67 +135,20 @@ class CreateLib:
                 shutil.copy(each_item, lib_folder)
 
 
-def setup_tk():
-    colour_bg_title = "white"
-    colour_bg = "#abcdef"
-    colour_btn = "green"
-    colour_txt = "white"
-
-    window = tk.Tk()
-    window.geometry("500x500")
-    window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
-    window.columnconfigure([0, 1, 2], minsize=100, weight=1)
-    window.title("Media Library Sorter")
+def setup_window():
+    # handle common tk elements
+    tk_elements = TkElements()
     
-   # --- add libraries frame
-
-    # object to handle creating new libs
+    # handle creating new libs
     new_lib = CreateLib()
-
-    addlib_frame = tk.Frame(window, bg="#abcdef")
-
-    add_label = tk.Label(addlib_frame, text="Add New Library", font=('Aeriel 20 bold'), bg=colour_bg_title)
-    add_label.grid(row=0, column=0, columnspan=2, sticky="we")
-
-    # Button to select files
-    add_button = tk.Button(addlib_frame, text="Browse Files To Add", command=new_lib.add_to_lib, bg=colour_btn, fg=colour_txt, width=15, height=2)
-    add_button.grid(row=1, column=0)
-
-    # Libs selected
-    new_lib.selected_items_label = tk.Label(addlib_frame, text="None selected yet", font=('Aeriel 10 bold'), bg=colour_bg)
-    # new_lib.selected_items_label.pack()
-    new_lib.selected_items_label.grid(row=1, column=1)
-
-    # Entry to get library name
-    new_lib.enter_name_label = tk.Label(addlib_frame, text="Enter Name of Library:", font=('Aeriel 10 bold'), bg=colour_bg)
-    # new_lib.enter_name_label.pack()
-    new_lib.enter_name_label.grid(row=2, column=0, pady=10)
-
-    new_lib.lib_name_entry = tk.Entry(addlib_frame, bg=colour_txt, width=25)
-    # new_lib.lib_name_entry.pack()
-    new_lib.lib_name_entry.grid(row=2, column=1)
-
-    save_button = tk.Button(addlib_frame, text="Save Library", command=new_lib.save_to_lib, bg=colour_btn, fg=colour_txt, width=15, height=2)
-    # save_button.pack()
-    save_button.grid(row=3, column=0, pady=10)
-
-    # Info label
-    new_lib.info_label = tk.Label(addlib_frame, text="", fg="red", bg=colour_bg)
-    # new_lib.info_label.pack()
-    new_lib.info_label.grid(row=4, column=0)
-
-    # frames to display on window
-    addlib_frame.pack()
-
-    # run Tkinter event loop 
-    window.mainloop()
-
     
+    # start Tkinter event loop
+    TkElements.window.mainloop()
+    
+
 def start_program_flow():
     print("--- Start ---")
-
-    # setup tk window, pass lib object
-    setup_tk()
+    setup_window()
 
 
 if __name__ == "__main__":
