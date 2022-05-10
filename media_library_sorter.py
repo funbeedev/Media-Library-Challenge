@@ -4,31 +4,28 @@ import pathlib
 import shutil
 from abc import ABC, abstractmethod
 
-def label_updater(label, new_text, append=False):
+def label_updater(label, label_text, append=False):
 
-    print("label updater")
-    # print(len(new_text))
-    # print(new_text)
-
-    print(type(new_text))
-    # if list is supplied print each element separately
-    if(type(new_text) == list):
-        # print(new_text[0])
-        # print(new_text[1])
-        if(append is False):
+    # if list is supplied print each portion separately
+    if(type(label_text) == list):
+        if(append is False):  # clear label to refresh full list
             label["text"] = ""
-        for element in new_text:
-            new_text = "\n".join(element)
-            new_text = label["text"] + "\n" + new_text
-            label["text"] = new_text 
+
+        for element in label_text:  
+            if(len(element) == 1):
+                label_text = "\n".join(element)
+            else:  # TODO: avoid separated elements when multiple items are selected in dialogue
+                label_text = "".join(element)
+            label_text = label["text"] + "\n" + label_text
+            label["text"] = label_text 
         return
 
     # if a string add to label, append if specified
     if(append is True):
-        new_text = label["text"] + "\n" + new_text
-        label["text"] = new_text
+        label_text = label["text"] + "\n" + label_text
+        label["text"] = label_text
     else:
-        label["text"] = new_text
+        label["text"] = label_text
 
 
 def entry_reader(entry):
@@ -106,9 +103,7 @@ class CreateLib(TkElements):
 
         # dialog asks user for items to add, append each to a list
         selected_items = filedialog.askopenfilenames(title='Select one or multiple items', filetypes=[('Any', '*')])
-        print(selected_items)
-        print(type(selected_items))
-        print(f"len:{len(selected_items)}")
+
         # handle when user multi selects items from dialog
         if (len(selected_items) > 1):
             for each_item in list(selected_items):
