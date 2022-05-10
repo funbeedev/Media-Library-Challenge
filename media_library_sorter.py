@@ -4,24 +4,6 @@ import pathlib
 import shutil
 
 
-class LibSorter:
-    # get the status of the library when obj is created
-    def __init__(self, lib_status):
-        # read library 'database' to see if one exists
-        self.lib_status = lib_status
-    
-    def view_button_cmd(self):
-        print("view button is clicked!")
-        if(self.lib_status) == 'no-libraries':
-            print("no libraries yet")
-
-    def add_button_cmd(self):
-        print("add button is clicked")
-
-    def edit_button_cmd(self):
-        print("edit button is clicked")
-        # print(f"User input: {entry.get()}")
-
 def label_updater(label, new_text, append=False):
 
     # if a list separate before printing in label
@@ -34,9 +16,11 @@ def label_updater(label, new_text, append=False):
     else:
         label["text"] = new_text
 
+
 def entry_reader(entry):
     entry_text = entry.get()
     return entry_text
+
 
 class CreateLib:
 
@@ -97,37 +81,18 @@ class CreateLib:
                 print(each_item)
                 shutil.copy(each_item, lib_folder)
 
-def setup_tk(media_lib):
+
+def setup_tk():
     colour_bg_title = "white"
     colour_bg = "#abcdef"
     colour_btn = "green"
     colour_txt = "white"
-
-    print(media_lib.lib_status)
 
     window = tk.Tk()
     window.geometry("500x500")
     window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
     window.columnconfigure([0, 1, 2], minsize=100, weight=1)
     window.title("Media Library Sorter")
-
-    # main window
-    main_frame = tk.Frame(window)
-
-    tk.Label(main_frame, text="Click an option to organise your libraries", fg="white", bg="black").pack()
-
-    view_button = tk.Button(main_frame, text="View Libraries", command=media_lib.view_button_cmd, width=25, height=5, bg="green", fg="white")
-    view_button.pack()
-
-    add_button = tk.Button(main_frame,text="Add Libraries", command=media_lib.add_button_cmd, width=25, height=5, bg="green", fg="white")
-    add_button.pack()
-
-    edit_button = tk.Button(main_frame, text="Edit Libraries", command=media_lib.edit_button_cmd, width=25, height=5, bg="green", fg="white")
-    edit_button.pack()
-
-    entry = tk.Entry(main_frame, fg="black", bg="white", width=50)
-    entry.pack()
-
     
    # --- add libraries frame
 
@@ -167,7 +132,6 @@ def setup_tk(media_lib):
     new_lib.info_label.grid(row=4, column=0)
 
     # frames to display on window
-    # main_frame.pack()
     addlib_frame.pack()
 
     # run Tkinter event loop 
@@ -175,12 +139,10 @@ def setup_tk(media_lib):
 
     
 def start_program_flow():
+    print("--- Start ---")
 
-    # object to handle lib functions
-    media_lib = LibSorter("no-libraries")
-       
     # setup tk window, pass lib object
-    setup_tk(media_lib)
+    setup_tk()
 
 
 if __name__ == "__main__":
