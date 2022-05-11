@@ -4,6 +4,8 @@ import pathlib
 import shutil
 from abc import ABC, abstractmethod
 
+
+# update label widgets with text
 def label_updater(label, label_text, append=False):
 
     # if list is supplied print each portion separately
@@ -28,11 +30,13 @@ def label_updater(label, label_text, append=False):
         label["text"] = label_text
 
 
+# read user inputs to entry widget
 def entry_reader(entry):
     entry_text = entry.get()
     return entry_text
 
 
+# share common tk elements
 class TkElements(ABC):
     lib_folder = "libraries/"
     lib_config_file = "libraries.config"
@@ -56,6 +60,8 @@ class TkElements(ABC):
     def draw_frame(self):
         pass
 
+
+# functions for adding new library items
 class CreateLib(TkElements):
 
     # draw widgets for creating libraries
@@ -162,6 +168,7 @@ class CreateLib(TkElements):
                 self.lib_items_all = []
 
 
+# functions for viewing library items
 class ViewLib(TkElements):
 
     all_libs_list = []
@@ -227,6 +234,7 @@ def refresh_lib_config_file():
     get_and_list_libs()
 
 
+# show latest lib items
 def get_and_list_libs():
 
     print("refreshing lib list")
@@ -256,14 +264,14 @@ def edit_lib_item(lib_index):
 
 
 def setup_window():
-    # handle common tk elements
-    # tk_elements = TkElements()
 
-    # handle creating new libs
+    print("--- Start of program ---")
+
+    # handle creation of new libs
     new_lib = CreateLib()
     new_lib.draw_frame()
 
-    # handle viewing libs
+    # handle viewing of libs
     view_lib = ViewLib()
     view_lib.draw_frame()
 
@@ -274,10 +282,5 @@ def setup_window():
     TkElements.window.mainloop()
 
 
-def start_program_flow():
-    print("--- Start ---")
-    setup_window()
-
-
 if __name__ == "__main__":
-    start_program_flow()
+    setup_window()
