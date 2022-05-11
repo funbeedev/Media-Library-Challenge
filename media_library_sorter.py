@@ -41,6 +41,7 @@ class TkElements(ABC):
     colour_bg = "#abcdef"
     colour_btn = "green"
     colour_txt = "white"
+    colour_info = "red"
     window = tk.Tk()
 
     # construct the GUI window
@@ -90,7 +91,7 @@ class CreateLib(TkElements):
 
         # Info label will provide feedback to user
         self.info_label = tk.Label(
-            addlib_frame, text="", fg="red", bg=TkElements.colour_bg)
+            addlib_frame, text="", fg=TkElements.colour_info, bg=TkElements.colour_bg)
         self.info_label.grid(row=4, column=0)
 
         # display frame on window
@@ -156,10 +157,10 @@ class CreateLib(TkElements):
 
             except(FileExistsError):
                 label_updater(self.info_label, "ERROR: Library already exists, enter a different name")
-            # except Exception as except_message:
-            #     label_updater(self.info_label, "ERROR: exception")
-            #     print(except_message)
-            #     self.lib_items_all = []
+            except Exception as except_message:
+                label_updater(self.info_label, "ERROR: exception")
+                print(except_message)
+                self.lib_items_all = []
 
 
 
@@ -188,8 +189,8 @@ class ViewLib(TkElements):
         # viewlib_button = tk.Button(viewlib_frame, text="View Existing Libraries", command=get_and_list_libs, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
         # viewlib_button.grid(row=1, column=0)
 
-        self.viewlib_label = tk.Label(viewlib_frame, text=".", font=('Aeriel 10 bold'))
-        self.viewlib_label.grid(row=2, column=0)
+        ViewLib.viewlib_label = tk.Label(viewlib_frame, text=".", font=('Aeriel 10 bold'))
+        ViewLib. viewlib_label.grid(row=2, column=0)
 
         # display frame in window
         viewlib_frame.pack()
@@ -229,22 +230,23 @@ def refresh_lib_config_file():
     get_and_list_libs()
 
 def get_and_list_libs():
+    
 
     print("refreshing lib list") 
     # print(*ViewLib.all_libs_list, sep="\n")     
 
     if(len(ViewLib.all_libs_list) == 0):
         print("No library items")
-        # label_updater(self.viewlib_label, "No library items found, add one first")
+        label_updater(ViewLib.viewlib_label, "No library items found, add one first")
         return
 
     # label_updater(self.viewlib_label, "")
     # extract lib names and create widget for each
     index = 0
+    label_updater(ViewLib.viewlib_label, "Select a library to view or edit")
     for element in ViewLib.all_libs_list:
         get_lib_name = element[0]
         print(f"lib name: {get_lib_name}")
-        # label_updater(ViewLib.viewlib_label, "Select a library to view or edit")
 
         # create buttons for each lib item, button can be referenced by index in library list
         tk.Button(ViewLib.libbuttons_frame, text=get_lib_name, command=lambda x=index+1: edit_lib_item(x), width=10, height=3, bg="blue", fg="white").grid(row=0, column=0+index)
