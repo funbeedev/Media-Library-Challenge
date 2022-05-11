@@ -3,7 +3,6 @@ from tkinter import filedialog
 import pathlib
 import shutil
 from abc import ABC, abstractmethod
-import linecache
 
 
 # share common tk elements
@@ -203,16 +202,6 @@ class EditLib(TkElements):
     pass
 
 
-def read_line_from_file(file_name, line_num):
-
-    # read contents of file at line number
-    file_content = linecache.getline(file_name, line_num)
-    file_content = file_content.strip('\n')
-    # clear cache so can read most recent file next time
-    linecache.clearcache
-    return file_content
-
-
 # update label widgets with text
 def label_updater(label, label_text, append=False):
 
@@ -341,12 +330,19 @@ def delete_lib():
 def list_lib_item(lib_index):
     print("list lib button clicked")
 
-    # read config file to get lib items, using index as line number
-    file_data = read_line_from_file(TkElements.lib_folder + TkElements.lib_config_file, lib_index)
+    # read lib config file to get lib items
+    path_to_file = TkElements.lib_folder + TkElements.lib_config_file
+    with open(path_to_file) as config_f:
+        file_data = []
+        for line in config_f:
+            file_data.append(line)
+
+    # grab selected lib config from index
+    file_data = file_data[lib_index - 1]
     file_data = file_data.split(",")
-    # grab name
+    # grab lib name
     lib_name = file_data[0]
-    # grab files - take from 2nd element
+    # grab files in lib
     lib_files = file_data[1:]
 
     # place lib name in entry
