@@ -13,6 +13,7 @@ When the program is run the first time, a directory is created in the same direc
 For example, if libraries `lib1` and `lib2` are added using the program, the following files are created: `libraries/lib1`, `libraries/lib2`.
 
 ## Usage
+![app_screenshot](https://user-images.githubusercontent.com/66768334/167768051-7e450e70-da5c-45de-a454-d31eeac83c0f.png)
 
 ### Adding items to library
 
