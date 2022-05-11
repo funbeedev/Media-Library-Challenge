@@ -32,6 +32,5 @@ For example, if libraries `lib1` and `lib2` are added using the program, the fol
 - Click the delete library button
 
 ## Known issues
-- Delete lib function not fully stable
 - Program currently can't handle too many library items as widgets will go out of screen
 - Responsiveness of GUI needs improvement
