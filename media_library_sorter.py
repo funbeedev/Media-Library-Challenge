@@ -3,37 +3,7 @@ from tkinter import filedialog
 import pathlib
 import shutil
 from abc import ABC, abstractmethod
-
-
-# update label widgets with text
-def label_updater(label, label_text, append=False):
-
-    # if list is supplied print each portion separately
-    if(type(label_text) == list):
-        if(append is False):  # clear label to refresh full list
-            label["text"] = ""
-
-        for element in label_text:
-            if(len(element) == 1):
-                label_text = "\n".join(element)
-            else:  # TODO: avoid separated elements when multiple items are selected in dialogue
-                label_text = "".join(element)
-            label_text = label["text"] + "\n" + label_text
-            label["text"] = label_text
-        return
-
-    # if a string add to label, append if specified
-    if(append is True):
-        label_text = label["text"] + "\n" + label_text
-        label["text"] = label_text
-    else:
-        label["text"] = label_text
-
-
-# read user inputs to entry widget
-def entry_reader(entry):
-    entry_text = entry.get()
-    return entry_text
+import linecache
 
 
 # share common tk elements
@@ -46,6 +16,9 @@ class TkElements(ABC):
     colour_btn = "green"
     colour_txt = "white"
     colour_info = "red"
+    font_large = ('Aeriel 20 bold')
+    font_small = ('Aeriel 10 bold')
+
     window = tk.Tk()
 
     # construct the GUI window
@@ -70,9 +43,9 @@ class CreateLib(TkElements):
         self.lib_items_all = []
 
         # construct frame for adding items to a library
-        addlib_frame = tk.Frame(TkElements.window, bg="#abcdef")
+        addlib_frame = tk.Frame(TkElements.window, bg=TkElements.colour_bg)
 
-        add_label = tk.Label(addlib_frame, text="Add New Library", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
+        add_label = tk.Label(addlib_frame, text="Add New Library", font=TkElements.font_large, bg=TkElements.colour_bg_title)
         add_label.grid(row=0, column=0, columnspan=2, sticky="we")
 
         # Button to select files
@@ -81,11 +54,11 @@ class CreateLib(TkElements):
 
         # Label to show files selected
         self.selected_items_label = tk.Label(
-            addlib_frame, text="Select items to add", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
+            addlib_frame, text="Select items to add", font=TkElements.font_small, bg=TkElements.colour_bg)
         self.selected_items_label.grid(row=1, column=1)
 
         # Entry to get library name
-        enter_name_label = tk.Label(addlib_frame, text="Enter Name of Library:", font=('Aeriel 10 bold'), bg=TkElements.colour_bg)
+        enter_name_label = tk.Label(addlib_frame, text="Enter Name of Library:", font=TkElements.font_small, bg=TkElements.colour_bg)
         enter_name_label.grid(row=2, column=0, pady=10)
 
         self.lib_name_entry = tk.Entry(addlib_frame, bg=TkElements.colour_txt, width=25)
@@ -163,7 +136,7 @@ class CreateLib(TkElements):
             except(FileExistsError):
                 label_updater(self.info_label, "ERROR: Library already exists, enter a different name")
             except Exception as except_message:
-                label_updater(self.info_label, "ERROR: exception")
+                label_updater(self.info_label, "ERROR: exception, debugging needed")
                 print(except_message)
                 self.lib_items_all = []
 
@@ -176,6 +149,9 @@ class ViewLib(TkElements):
     # frame to hold dynamic buttons for each  existing lib
     libbuttons_frame = tk.Frame(TkElements.window)
 
+    # frame for showing info on each lib
+    libitems_frame = tk.Frame(TkElements.window)
+
     def __init__(self):
         # ensure lib folder exists, if not create
         lib_path = pathlib.Path(self.lib_folder)
@@ -187,21 +163,90 @@ class ViewLib(TkElements):
     def draw_frame(self):
         viewlib_frame = tk.Frame(TkElements.window)
 
-        yourlib_label = tk.Label(viewlib_frame, text="Your Existing Libraries", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
+        yourlib_label = tk.Label(viewlib_frame, text="Your Existing Libraries", font=TkElements.font_large, bg=TkElements.colour_bg_title)
         yourlib_label.grid(row=0, column=0, columnspan=2, sticky="we")
 
         # viewlib_button = tk.Button(viewlib_frame, text="View Existing Libraries", command=get_and_list_libs, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
         # viewlib_button.grid(row=1, column=0)
 
-        ViewLib.viewlib_label = tk.Label(viewlib_frame, text=".", font=('Aeriel 10 bold'))
+        ViewLib.viewlib_label = tk.Label(viewlib_frame, text=".", font=TkElements.font_small)
         ViewLib. viewlib_label.grid(row=2, column=0)
+
+        ViewLib.editlib_entry = tk.Entry(self.libitems_frame, bg=TkElements.colour_txt, width=25)
+        ViewLib.editlib_entry.grid(row=0, column=0)
+
+        ViewLib.libitems_label = tk.Label(self.libitems_frame, text=".", font=TkElements.font_small)
+        ViewLib.libitems_label.grid(row=1, column=0)
 
         # display frame in window
         viewlib_frame.pack()
         self.libbuttons_frame.pack()
+        self.libitems_frame.pack()
+
+
+# performing edit functions on library items
+class EditLib(TkElements):
+
+    # draw widgets for editing libraries
+    def draw_frame(self):
+        editlib_frame = tk.Frame(TkElements.window)
+
+        deletelib_button = tk.Button(editlib_frame, text="Delete selected lib", command=delete_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
+        deletelib_button.grid(row=0, column=0)
+
+        # renamelib_button = tk.Button(editlib_frame, text="Rename selected lib", command=rename_lib, bg=TkElements.colour_btn, fg=TkElements.colour_txt, width=15, height=2)
+        # renamelib_button.grid(row=0, column=1)
+
+        # display frame in window
+        editlib_frame.pack()
+
+    pass
+
+
+def read_line_from_file(file_name, line_num):
+
+    # read contents of file at line number
+    file_content = linecache.getline(file_name, line_num)
+    file_content = file_content.strip('\n')
+    # clear cache so can read most recent file next time
+    linecache.clearcache
+    return file_content
+
+
+# update label widgets with text
+def label_updater(label, label_text, append=False):
+
+    # if list is supplied print each portion separately
+    if(type(label_text) == list):
+        if(append is False):  # clear label to refresh full list
+            label["text"] = ""
+
+        for element in label_text:
+            if(len(element) == 1):
+                label_text = "\n".join(element)
+            else:  # TODO: avoid separated elements when multiple items are selected in dialogue
+                label_text = "".join(element)
+            label_text = label["text"] + "\n" + label_text
+            label["text"] = label_text
+        return
+
+    # if a string add to label, append if specified
+    if(append is True):
+        label_text = label["text"] + "\n" + label_text
+        label["text"] = label_text
+    else:
+        label["text"] = label_text
+
+
+# read user inputs to entry widget
+def entry_reader(entry):
+    entry_text = entry.get()
+    return entry_text
 
 
 def refresh_lib_config_file():
+
+    print("refreshing lib config")
     # iterate through all items in library folders. get name of lib and items in each lib
     # generate list of lists representing all library items - format: [[lib1-name, lib1-item1, lib1-item2], [lib2-name, lib2-item1], [...]]
     index = 0
@@ -237,30 +282,80 @@ def refresh_lib_config_file():
 # show latest lib items
 def get_and_list_libs():
 
-    print("refreshing lib list")
+    print("refreshing displayed lib list")
     # print(*ViewLib.all_libs_list, sep="\n")
+
+    # destroy and recreate to refresh buttons # TODO: better implementation needed
+    ViewLib.libbuttons_frame.destroy()
+    ViewLib.libbuttons_frame = tk.Frame(TkElements.window)
+    ViewLib.libbuttons_frame.pack()
 
     if(len(ViewLib.all_libs_list) == 0):
         print("No library items")
         label_updater(ViewLib.viewlib_label, "No library items found, add one first")
         return
 
-    # label_updater(self.viewlib_label, "")
     # extract lib names and create widget for each
     index = 0
-    label_updater(ViewLib.viewlib_label, "Select a library to view or edit")
+    label_updater(ViewLib.viewlib_label, "Select a library / type the name in field to edit")
     for element in ViewLib.all_libs_list:
         get_lib_name = element[0]
         print(f"lib name: {get_lib_name}")
 
         # create buttons for each lib item, button can be referenced by index in library list
-        tk.Button(ViewLib.libbuttons_frame, text=get_lib_name, command=lambda x=index + 1: edit_lib_item(x), width=10, height=3, bg="blue", fg="white").grid(row=0, column=0 + index)
+        tk.Button(ViewLib.libbuttons_frame, text=get_lib_name, command=lambda x=index + 1: list_lib_item(x), width=10, height=3, bg="blue", fg="white").grid(row=0, column=0 + index)
         index += 1
 
 
-def edit_lib_item(lib_index):
-    print("edit lib button clicked")
-    print(lib_index)
+def delete_lib():
+    print("delete lib button clicked")
+
+    # put together folder path to delete using lib name
+    lib_to_delete_path = TkElements.lib_folder + ViewLib.editlib_entry.get()
+
+    if (ViewLib.editlib_entry.get() == ""):
+        print("lib selector is blank, do nothing")
+        return
+
+    try:
+        # small check to ensure libraries folder is what we are deleting
+        if("libraries/" in lib_to_delete_path):
+            print(f"deleting lib: {lib_to_delete_path}")
+            shutil.rmtree(pathlib.Path(lib_to_delete_path))
+    except(FileNotFoundError):
+        label_updater(ViewLib.libitems_label, "Library name doesn't exist, check name")
+        return
+
+    # clear fields
+    ViewLib.editlib_entry.delete(0, tk.END)
+    label_updater(ViewLib.libitems_label, "")
+    # refresh lib structure
+    refresh_lib_config_file()
+
+
+# def rename_lib():
+#     print("rename lib button clicked")
+#     pass
+
+
+def list_lib_item(lib_index):
+    print("list lib button clicked")
+
+    # read config file to get lib items, using index as line number
+    file_data = read_line_from_file(TkElements.lib_folder + TkElements.lib_config_file, lib_index)
+    file_data = file_data.split(",")
+    # grab name
+    lib_name = file_data[0]
+    # grab files - take from 2nd element
+    lib_files = file_data[1:]
+
+    # place lib name in entry
+    ViewLib.editlib_entry.delete(0, tk.END)
+    ViewLib.editlib_entry.insert(0, lib_name)
+
+    # list lib files in label
+    label_updater(ViewLib.libitems_label, "Library files:")
+    label_updater(ViewLib.libitems_label, lib_files, True)
 
 
 def setup_window():
@@ -274,6 +369,10 @@ def setup_window():
     # handle viewing of libs
     view_lib = ViewLib()
     view_lib.draw_frame()
+
+    # handle edit lib
+    edit_lib = EditLib()
+    edit_lib.draw_frame()
 
     # regenerate config file from current library structure
     refresh_lib_config_file()
