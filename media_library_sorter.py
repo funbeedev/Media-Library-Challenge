@@ -11,13 +11,13 @@ def label_updater(label, label_text, append=False):
         if(append is False):  # clear label to refresh full list
             label["text"] = ""
 
-        for element in label_text:  
+        for element in label_text:
             if(len(element) == 1):
                 label_text = "\n".join(element)
             else:  # TODO: avoid separated elements when multiple items are selected in dialogue
                 label_text = "".join(element)
             label_text = label["text"] + "\n" + label_text
-            label["text"] = label_text 
+            label["text"] = label_text
         return
 
     # if a string add to label, append if specified
@@ -46,10 +46,10 @@ class TkElements(ABC):
 
     # construct the GUI window
     def __init__(self):
-       self.window.geometry("700x700")
-       self.window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
-       self.window.columnconfigure([0, 1, 2], minsize=100, weight=1)
-       self.window.title("Media Library Sorter")
+        self.window.geometry("700x700")
+        self.window.rowconfigure([0, 1, 2, 3, 4], minsize=100, weight=1)
+        self.window.columnconfigure([0, 1, 2], minsize=100, weight=1)
+        self.window.title("Media Library Sorter")
 
     # ensure method is used in inherited classes
     @abstractmethod
@@ -58,12 +58,12 @@ class TkElements(ABC):
 
 class CreateLib(TkElements):
 
-    # draw widgets for creating libraries  
+    # draw widgets for creating libraries
     def draw_frame(self):
-        
+
         self.lib_items_all = []
 
-        # construct frame for adding items to a library    
+        # construct frame for adding items to a library
         addlib_frame = tk.Frame(TkElements.window, bg="#abcdef")
 
         add_label = tk.Label(addlib_frame, text="Add New Library", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
@@ -97,7 +97,6 @@ class CreateLib(TkElements):
         # display frame on window
         addlib_frame.pack()
 
-
     def add_to_lib(self):
 
         # clear labels
@@ -113,13 +112,13 @@ class CreateLib(TkElements):
                 self.lib_items_all.append(each_item)
         else:
             self.lib_items_all.append(list(selected_items))
-        
+
         # update label with selected items
         print(f"Selected items: {self.lib_items_all}")
         label_updater(self.selected_items_label, self.lib_items_all)
 
     def save_to_lib(self):
-        
+
         # get name entered by user
         lib_name = entry_reader(self.lib_name_entry)
         # remove spaces from lib name if any
@@ -139,7 +138,7 @@ class CreateLib(TkElements):
             # create folder representing lib
             try:
                 # lib_name = "lib-"+lib_name
-                lib_name = "libraries/"+lib_name
+                lib_name = "libraries/" + lib_name
                 lib_folder = pathlib.Path(lib_name)
                 lib_folder.mkdir(parents=True, exist_ok=False)
                 label_updater(self.selected_items_label, "Select items to add")
@@ -163,14 +162,12 @@ class CreateLib(TkElements):
                 self.lib_items_all = []
 
 
-
-
 class ViewLib(TkElements):
 
     all_libs_list = []
 
-    # frame to hold dynamic buttons for each  existing lib 
-    libbuttons_frame = tk.Frame(TkElements.window)  
+    # frame to hold dynamic buttons for each  existing lib
+    libbuttons_frame = tk.Frame(TkElements.window)
 
     def __init__(self):
         # ensure lib folder exists, if not create
@@ -179,9 +176,9 @@ class ViewLib(TkElements):
             print("libraries folder doesn't exist, creating")
             lib_path.mkdir()
 
-    # draw widgets for viewing libraries  
+    # draw widgets for viewing libraries
     def draw_frame(self):
-        viewlib_frame = tk.Frame(TkElements.window) 
+        viewlib_frame = tk.Frame(TkElements.window)
 
         yourlib_label = tk.Label(viewlib_frame, text="Your Existing Libraries", font=('Aeriel 20 bold'), bg=TkElements.colour_bg_title)
         yourlib_label.grid(row=0, column=0, columnspan=2, sticky="we")
@@ -219,21 +216,21 @@ def refresh_lib_config_file():
             index += 1
 
     # write list representing library config to file
-    path_to_write = TkElements.lib_folder+TkElements.lib_config_file
+    path_to_write = TkElements.lib_folder + TkElements.lib_config_file
     with open(path_to_write, "w+") as f_config:
         for element in ViewLib.all_libs_list:
             # element = str(element) + "\n" # write to file as pure list
-            element = ",".join(element) # write to file as comma separated
-            f_config.write(element+"\n")
-    
+            element = ",".join(element)  # write to file as comma separated
+            f_config.write(element + "\n")
+
     # show the current lib status after refreshing
     get_and_list_libs()
 
-def get_and_list_libs():
-    
 
-    print("refreshing lib list") 
-    # print(*ViewLib.all_libs_list, sep="\n")     
+def get_and_list_libs():
+
+    print("refreshing lib list")
+    # print(*ViewLib.all_libs_list, sep="\n")
 
     if(len(ViewLib.all_libs_list) == 0):
         print("No library items")
@@ -249,7 +246,7 @@ def get_and_list_libs():
         print(f"lib name: {get_lib_name}")
 
         # create buttons for each lib item, button can be referenced by index in library list
-        tk.Button(ViewLib.libbuttons_frame, text=get_lib_name, command=lambda x=index+1: edit_lib_item(x), width=10, height=3, bg="blue", fg="white").grid(row=0, column=0+index)
+        tk.Button(ViewLib.libbuttons_frame, text=get_lib_name, command=lambda x=index + 1: edit_lib_item(x), width=10, height=3, bg="blue", fg="white").grid(row=0, column=0 + index)
         index += 1
 
 
@@ -261,11 +258,11 @@ def edit_lib_item(lib_index):
 def setup_window():
     # handle common tk elements
     # tk_elements = TkElements()
-    
+
     # handle creating new libs
     new_lib = CreateLib()
     new_lib.draw_frame()
-    
+
     # handle viewing libs
     view_lib = ViewLib()
     view_lib.draw_frame()
@@ -275,7 +272,7 @@ def setup_window():
 
     # start Tkinter event loop
     TkElements.window.mainloop()
-    
+
 
 def start_program_flow():
     print("--- Start ---")
